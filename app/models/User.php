@@ -14,6 +14,8 @@ class User extends Model{
 	const state_initial = 'initial';
 	const state_active = 'active';
 	const state_suspended = 'suspended';
+	
+	public $uroles = array();
 	/**
 	 * Add rules for this model.
 	 *
@@ -24,6 +26,10 @@ class User extends Model{
 		
 		$s = $this->schema();
 		
+		$s->hasMany('roles')->thru('UserRole', true)->className('Role', true);
+		
+		$this->prepareRoles();
+		
 		$s->required('login');
 		
 		$s->rule('login', new \NameRule());
@@ -31,6 +37,20 @@ class User extends Model{
 		$s->rule('password', new \PregRule('%^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).{4,10}$%', 'Password should include one lower case letter, one upper case letter, one digit, 6-15 length, and no spaces.'));		
 	}
 	
+	/**
+	 * Does the user have the appropriate roles?
+	 * 
+	 * This is an exclusive check (AND).
+	 *
+	 * @return void
+	 * @author Justin Palmer
+	 **/
+	public function hasRoles($roles)
+	{
+		$roles = func_get_args();
+		$diff = array_diff($roles, $this->uroles);
+		return (count($diff) == 0);
+	}
 	/**
 	 * Static method to create a new user
 	 *
@@ -41,7 +61,7 @@ class User extends Model{
 	{
 		$u = new User($array);
 		$u->activation_code = self::token();
-		$u->state = 'initial';
+		$u->state = self::state_initial;
 		return $u;
 	}
 	
@@ -106,5 +126,21 @@ class User extends Model{
 	{
 		srand();
 		return sha1(sha1(sha1(sha1(time() . md5(rand() . date('Y-m-d'))))));
+	}
+	
+	/**
+	 * Prepare the roles for comparison
+	 *
+	 * @return void
+	 * @author Justin Palmer
+	 **/
+	public function prepareRoles()
+	{
+		if(count($this->uroles) > 0)
+			return;
+		$roles = $this->roles;
+		foreach($roles as $role){
+			$this->uroles[] = $role->name;
+		}
 	}
 }
