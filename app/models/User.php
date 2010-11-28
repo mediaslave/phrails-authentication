@@ -2,14 +2,14 @@
 /**
  * Namespace for models
  */
-//namespace net\mediaslave\phrails\authentication\app\models;
+namespace net\mediaslave\authentication\app\models;
 /**
  * PageBlock
  */
 /**
  * 
  */
-class User extends Model{
+class User extends \Model{
 	
 	const state_initial = 'initial';
 	const state_active = 'active';
@@ -26,10 +26,9 @@ class User extends Model{
 		
 		$s = $this->schema();
 		
-		$s->hasMany('roles')->thru('UserRole', true)->className('Role', true);
+		$s->hasMany('roles')->thru('net\mediaslave\authentication\app\models\UserRole', true)->className('net\mediaslave\authentication\app\models\Role', true);
 		
 		$this->prepareRoles();
-		
 		$s->required('login');
 		
 		$s->rule('login', new \NameRule());
@@ -50,6 +49,18 @@ class User extends Model{
 		$roles = func_get_args();
 		$diff = array_diff($roles, $this->uroles);
 		return (count($diff) == 0);
+	}
+	/**
+	 * Does the user have any one of the roles listed
+	 *
+	 * @return void
+	 * @author Justin Palmer
+	 **/
+	public function hasAnyRole($roles)
+	{
+		$roles = func_get_args();
+		$intersect = array_intersect($roles, $this->uroles);
+		return (count($intersect) > 0);
 	}
 	/**
 	 * Static method to create a new user

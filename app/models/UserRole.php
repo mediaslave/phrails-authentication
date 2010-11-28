@@ -2,13 +2,14 @@
 /**
  * Namespace for models
  */
+namespace net\mediaslave\authentication\app\models;
 /**
  * PageBlock
  */
 /**
  * ClassBlock
  */
-class UserRole extends Model{
+class UserRole extends \Model{
 	
 	
 	/**
