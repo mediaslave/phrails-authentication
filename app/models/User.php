@@ -44,7 +44,7 @@ class User extends \Model{
 	 * @return void
 	 * @author Justin Palmer
 	 **/
-	public function hasRoles($roles)
+	public function hasRole($roles)
 	{
 		$roles = func_get_args();
 		$diff = array_diff($roles, $this->uroles);
