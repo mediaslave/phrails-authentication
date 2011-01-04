@@ -15,6 +15,12 @@ class User extends \Model{
 	const state_active = 'active';
 	const state_suspended = 'suspended';
 	
+	/**
+	 * This is because the constant CRYPT_SALT_LENGTH does not work
+	 * on all versions of PHP.
+	 */
+	const crypt_salt_length = 37;
+	
 	public $uroles = array();
 	/**
 	 * Add rules for this model.
@@ -121,7 +127,7 @@ class User extends \Model{
 			return crypt($password, $this->salt);
 		if($this->password !== null){
 			srand();
-			$salt = '$2a$10$' . substr(hash('whirlpool', md5($this->login . rand() . md5(date('y-m-d')) . $this->email)), 0, CRYPT_SALT_LENGTH) . '$';
+			$salt = '$2a$10$' . substr(hash('whirlpool', md5($this->login . rand() . md5(date('y-m-d')) . $this->email)), 0, self::crypt_salt_length) . '$';
 			$this->password =  crypt($this->password, $salt);
 			$this->salt = $salt;
 		}
