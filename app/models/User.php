@@ -85,7 +85,7 @@ class User extends \Model{
 	public function remind()
 	{
 		$this->remember = $this->token();
-		$this->remember_expires_at = new Expression('DATE_ADD( NOW() , INTERVAL 2 HOUR )');
+		$this->remember_expires_at = new \Expression('DATE_ADD( NOW() , INTERVAL 2 HOUR )');
 		return $this;
 	}
 	
