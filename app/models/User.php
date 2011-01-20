@@ -160,4 +160,13 @@ class User extends \Model{
 			$this->uroles[] = $role->name;
 		}
 	}
+
+  public function uniqueLogin($login = null) {
+    if ($login === null) {
+      $login = $this->login;
+    }
+
+    $u = $this->where('login = ?', $login)->findAll(false);
+    return $u instanceof User ? false : true;
+  }
 }
