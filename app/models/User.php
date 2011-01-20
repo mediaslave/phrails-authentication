@@ -38,7 +38,10 @@ class User extends \Model{
 		$s->required('login');
 		
 		$s->rule('login', new \NameRule());
+		$s->rule('login', new \UniqueDatabaseRule());
 		$s->rule('email', new \EmailRule());
+		$s->rule('email', new \UniqueDatabaseRule());
+
 		$s->rule('password', new \PregRule('%^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).{4,10}$%', 'Password should include one lower case letter, one upper case letter, one digit, 6-15 length, and no spaces.'));		
 	}
 	
@@ -161,12 +164,4 @@ class User extends \Model{
 		}
 	}
 
-  public function uniqueLogin($login = null) {
-    if ($login === null) {
-      $login = $this->login;
-    }
-
-    $u = $this->where('login = ?', $login)->findAll(false);
-    return $u instanceof User ? false : true;
-  }
 }
