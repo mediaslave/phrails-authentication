@@ -19,6 +19,8 @@ class UserRole extends \Model{
 	 */
 	public function init(){
 		$s = $this->schema();
+
+		$s->rule('user_id', 'role_id', new \IntegerRule());
 		
 	}
 }

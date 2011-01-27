@@ -22,6 +22,9 @@ class User extends \Model{
 	const crypt_salt_length = 37;
 	
 	public $uroles = array();
+
+	private $primary_role = null;
+
 	/**
 	 * Add rules for this model.
 	 *
@@ -29,16 +32,21 @@ class User extends \Model{
 	 */
 	public function init(){
 		$this->filters()->beforeSave('encrypt');
+		$this->filters()->afterSave('savePrimaryRole');
 		
 		$s = $this->schema();
 		
 		$s->hasMany('roles')->thru('net\mediaslave\authentication\app\models\UserRole', true)->className('net\mediaslave\authentication\app\models\Role', true);
-		
+		$s->hasMany('user_roles')->className('net\mediaslave\authentication\app\models\UserRole', true);
+
 		$this->prepareRoles();
 		$s->required('login');
 		
 		$s->rule('login', new \NameRule());
+		$s->rule('login', new \UniqueDatabaseRule());
 		$s->rule('email', new \EmailRule());
+		$s->rule('email', new \UniqueDatabaseRule());
+
 		$s->rule('password', new \PregRule('%^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).{4,10}$%', 'Password should include one lower case letter, one upper case letter, one digit, 6-15 length, and no spaces.'));		
 	}
 	
@@ -74,9 +82,10 @@ class User extends \Model{
 	 * @return void
 	 * @author Justin Palmer
 	 **/
-	public static function create(array $array=array())
+	public static function create(array $array=array(), $primary_role = null)
 	{
 		$u = new User($array);
+		$u->primary_role = $primary_role;
 		$u->activation_code = self::token();
 		$u->state = self::state_initial;
 		return $u;
@@ -160,4 +169,17 @@ class User extends \Model{
 			$this->uroles[] = $role->name;
 		}
 	}
+
+	public function savePrimaryRole() {
+		if ($this->primary_role === NULL) {
+			return true;
+		}
+		
+		$ur = new UserRole();
+		$ur->user_id = $this->id;
+		$ur->role_id = $this->primary_role;
+
+		return $ur->save();
+	}
+
 }
