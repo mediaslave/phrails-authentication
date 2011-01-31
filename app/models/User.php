@@ -23,8 +23,6 @@ class User extends \Model{
 	
 	public $uroles = array();
 
-	private $primary_role = null;
-
 	/**
 	 * Add rules for this model.
 	 *
@@ -82,10 +80,9 @@ class User extends \Model{
 	 * @return void
 	 * @author Justin Palmer
 	 **/
-	public static function create(array $array=array(), $primary_role = null)
+	public static function create(array $array=array())
 	{
 		$u = new User($array);
-		$u->primary_role = $primary_role;
 		$u->activation_code = self::token();
 		$u->state = self::state_initial;
 		return $u;
@@ -169,17 +166,4 @@ class User extends \Model{
 			$this->uroles[] = $role->name;
 		}
 	}
-
-	public function savePrimaryRole() {
-		if ($this->primary_role === NULL) {
-			return true;
-		}
-		
-		$ur = new UserRole();
-		$ur->user_id = $this->id;
-		$ur->role_id = $this->primary_role;
-
-		return $ur->save();
-	}
-
 }
