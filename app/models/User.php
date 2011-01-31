@@ -30,7 +30,6 @@ class User extends \Model{
 	 */
 	public function init(){
 		$this->filters()->beforeSave('encrypt');
-		$this->filters()->afterSave('savePrimaryRole');
 		
 		$s = $this->schema();
 		
