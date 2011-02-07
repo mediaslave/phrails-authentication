@@ -30,7 +30,6 @@ class User extends \Model{
 	 */
 	public function init(){
 		$this->filters()->beforeSave('encrypt');
-		$this->filters()->afterSave('savePrimaryRole');
 		
 		$s = $this->schema();
 		
@@ -80,7 +79,7 @@ class User extends \Model{
 	 * @return void
 	 * @author Justin Palmer
 	 **/
-	public static function create(array $array=array())
+	public static function createNew(array $array=array())
 	{
 		$u = new User($array);
 		$u->activation_code = self::token();
@@ -110,7 +109,7 @@ class User extends \Model{
 	public function authenticate()
 	{
 		$ret = false;
-		$u = $this->where('login = ? && state = ?', $this->login, self::state_active)->findAll(false);
+		$u = $this->where('login = ? && state = ?', $this->login, self::state_active)->find();
 		if($u instanceof User){
 			$ret =  ($u->password == $u->encrypt($this->password)) ? $u : false;
 		
