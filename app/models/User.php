@@ -109,14 +109,13 @@ class User extends \Model{
 	public function authenticate()
 	{
 		$ret = false;
-		$u = $this->where('login = ? && state = ?', $this->login, self::state_active)->find();
-		if($u instanceof User){
-			$ret =  ($u->password == $u->encrypt($this->password)) ? $u : false;
-		
+		try{
+			$u = $this->where('login = ? AND state = ?', $this->login, self::state_active)->find();
 			$u->password = '';
 			$u->salt = '';
-		}
-		return $ret;
+			return ($u->password == $u->encrypt($this->password)) ? $u : false;
+		}catch(\RecordNotFoundException $e){}
+		return false;
 	}
 	
 	
@@ -126,7 +125,7 @@ class User extends \Model{
 	 * @return void
 	 * @author Justin Palmer
 	 **/
-	public function encrypt($password=null)
+	protected function encrypt($password=null)
 	{
 		if($password !== null)
 			return crypt($password, $this->salt);
