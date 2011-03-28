@@ -39,7 +39,7 @@ class User extends \Model{
 		$this->prepareRoles();
 		$s->required('login');
 		
-		$s->rule('login', new \NameRule());
+		$s->rule('login', new \AlphaExtraRule('\-\s\.0-9', '%s can include any alphanumeric character, hyphen, space and period.'));
 		$s->rule('login', new \LengthRangeRule(6, 15));
 		$s->rule('login', new \UniqueDatabaseRule());
 		$s->rule('email', new \EmailRule());
