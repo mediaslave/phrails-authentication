@@ -113,9 +113,10 @@ class User extends \Model{
 		$ret = false;
 		try{
 			$u = $this->where('login = ? AND state = ?', $this->login, self::state_active)->find();
+			$ret = ($u->password == $u->encrypt($this->password)) ? $u : false;
 			$u->password = '';
 			$u->salt = '';
-			return ($u->password == $u->encrypt($this->password)) ? $u : false;
+			return $ret;
 		}catch(\RecordNotFoundException $e){}
 		return false;
 	}
@@ -129,8 +130,9 @@ class User extends \Model{
 	 **/
 	protected function encrypt($password=null)
 	{
-		if($password !== null)
+		if($password !== null){
 			return crypt($password, $this->salt);
+		}
 		if($this->password !== null){
 			srand();
 			$salt = '$2a$10$' . substr(hash('whirlpool', md5($this->login . rand() . md5(date('y-m-d')) . $this->email)), 0, self::crypt_salt_length) . '$';
