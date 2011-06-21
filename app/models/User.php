@@ -15,6 +15,9 @@ class User extends \Model{
 	const state_active = 'active';
 	const state_suspended = 'suspended';
 	
+	const USERNAME_MESSAGE = 'Username should be between 6 and 15 characters in length.  Additionally, it can only contain characters (a-z or capital A-Z), period (.) and hyphen (-).';
+	const PASSWORD_MESSAGE = 'Password should be between 6 and 15 characters in length.  Additionally, it must contain one upper case letter, one lower case letter, and one digit. It may not contain spaces.';
+	
 	/**
 	 * This is because the constant CRYPT_SALT_LENGTH does not work
 	 * on all versions of PHP.
