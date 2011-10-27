@@ -7,23 +7,23 @@ namespace net\mediaslave\authentication\app\models;
  * PageBlock
  */
 /**
- * 
+ *
  */
 class User extends \Model{
-	
+
 	const state_initial = 'initial';
 	const state_active = 'active';
 	const state_suspended = 'suspended';
-	
+
 	const USERNAME_MESSAGE = 'Username should be between 6 and 15 characters in length.  Additionally, it can only contain characters (a-z or capital A-Z), period (.) and hyphen (-).';
 	const PASSWORD_MESSAGE = 'Password should be between 6 and 15 characters in length.  Additionally, it must contain one upper case letter, one lower case letter, and one digit. It may not contain spaces.';
-	
+
 	/**
 	 * This is because the constant CRYPT_SALT_LENGTH does not work
 	 * on all versions of PHP.
 	 */
 	const crypt_salt_length = 37;
-	
+
 	public $uroles = array();
 
 	/**
@@ -33,28 +33,28 @@ class User extends \Model{
 	 */
 	public function init(){
 		$this->filters()->beforeSave('encrypt');
-		
+
 		$s = $this->schema();
-		
+
 		$s->hasMany('roles')->thru('net\mediaslave\authentication\app\models\UserRole', true)->className('net\mediaslave\authentication\app\models\Role', true);
 		$s->hasMany('user_roles')->className('net\mediaslave\authentication\app\models\UserRole', true);
 
 		$this->prepareRoles();
-		$s->required('login');
-		
+		$s->required('login', 'email');
+
 		$s->rule('login', new \AlphaExtraRule('\-\s\.0-9', '%s can include any alphanumeric character, hyphen, space and period.'));
 		$s->rule('login', new \LengthRangeRule(6, 15));
 		$s->rule('login', new \UniqueDatabaseRule());
 		$s->rule('email', new \EmailRule());
 		$s->rule('email', new \UniqueDatabaseRule());
 
-		$s->rule('password', new \PregRule('%^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).{4,13}$%', 'Password should include one lower case letter, one upper case letter, one digit, 6-15 characters in length, and no spaces.'));		
+		$s->rule('password', new \PregRule('%^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).{4,13}$%', 'Password should include one lower case letter, one upper case letter, one digit, 6-15 characters in length, and no spaces.'));
 
 	}
-	
+
 	/**
 	 * Does the user have the appropriate roles?
-	 * 
+	 *
 	 * This is an exclusive check (AND).
 	 *
 	 * @return void
@@ -91,7 +91,7 @@ class User extends \Model{
 		$u->state = self::state_initial;
 		return $u;
 	}
-	
+
 	/**
 	 * Set the remind token for a user
 	 *
@@ -104,7 +104,7 @@ class User extends \Model{
 		$this->remember_expires_at = new \Expression('DATE_ADD( NOW() , INTERVAL 2 HOUR )');
 		return $this;
 	}
-	
+
 	/**
 	 * Authenticate the user
 	 *
@@ -123,8 +123,8 @@ class User extends \Model{
 		}catch(\RecordNotFoundException $e){}
 		return false;
 	}
-	
-	
+
+
 	/**
 	 * Encrypt the password
 	 *
@@ -143,7 +143,7 @@ class User extends \Model{
 			$this->salt = $salt;
 		}
 	}
-	
+
 	/**
 	 * Generate an activation or remember token
 	 *
@@ -155,7 +155,7 @@ class User extends \Model{
 		srand();
 		return sha1(sha1(sha1(sha1(time() . md5(rand() . date('Y-m-d'))))));
 	}
-	
+
 	/**
 	 * Prepare the roles for comparison
 	 *
