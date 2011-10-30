@@ -40,7 +40,7 @@ class User extends \Model{
 		$s->hasMany('user_roles')->className('net\mediaslave\authentication\app\models\UserRole', true);
 
 		$this->prepareRoles();
-		$s->required('login', 'email');
+		$s->required('login', 'email', 'password');
 
 		$s->rule('login', new \AlphaExtraRule('\-\s\.0-9', '%s can include any alphanumeric character, hyphen, space and period.'));
 		$s->rule('login', new \LengthRangeRule(6, 15));
