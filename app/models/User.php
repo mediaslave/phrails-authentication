@@ -111,11 +111,15 @@ class User extends \Model{
 	 * @return void
 	 * @author Justin Palmer
 	 **/
-	public function authenticate()
+	public function authenticate($active_state = true)
 	{
 		$ret = false;
 		try{
-			$u = $this->where('login = ? AND state = ?', $this->login, self::state_active)->find();
+			if($active_state){
+				$u = $this->findByLoginAndState($this->login, self::state_active);
+			}else{
+				$u = $this->findByLogin($this->login);
+			}
 			$ret = ($u->password == $u->encrypt($this->password)) ? $u : false;
 			$u->password = '';
 			$u->salt = '';
