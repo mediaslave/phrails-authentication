@@ -17,7 +17,7 @@ class Migration_20101109084019_User extends Migration{
 			$this->text('password', 'limit:80');
 			$this->string('salt', 'limit:60');
 			$this->string('remember');
-			$this->datetime('remember_expires_at')
+			$this->datetime('remember_expires_at');
 			$this->string('activation_code', 'limit:255');
 			$this->date('activated_at');
 			$this->string('state', 'limit:30');
