@@ -1,0 +1,365 @@
+#!/usr/bin/php -q
+<?php
+include 'boot.php';
+define('PROJECT_ROOT', '');
+$script = array_shift($argv);
+$operation = array_shift($argv);
+$name = array_shift($argv);
+
+switch(strtolower($operation)){
+	case 'controller':
+		generate_controller($name, $argv);
+		break;
+	case 'mailer':
+		generate_mailer($name, $argv);
+		break;
+	case 'model':
+		generate_model($name);
+		break;
+	case 'migration':
+		generate_migration($name, false);
+		break;
+	case 'resources':
+		//Create the singular model name.
+		$arr = explode('/', $name);
+		$model_name = '';
+		foreach($arr as $piece){
+			$model_name .= ucfirst(Inflections::singularize($piece));
+		}
+		generate_model($model_name);
+		generate_controller($name, $argv);
+		break;
+	default:
+		print 'Unknown generator: ' . $operation . "\n\nThe known generators are 'controller', 'mailer', 'model', 'migration' and 'resources'";
+}
+
+function generate_model($name){
+	$namespace = PR_APPLICATION_NAMESPACE;
+	$model = <<<MODEL
+<?php
+/**
+ * Namespace for models
+ */
+namespace $namespace\App\Models;
+/**
+ * PageBlock
+ */
+/**
+ * ClassBlock
+ */
+class $name extends \Model{
+
+
+	/**
+	 * Add rules for this model.
+	 *
+	 * @author
+	 */
+	public function init(){
+
+	}
+}
+MODEL;
+
+$test_name = $name . 'Test';
+
+	$test = <<<TEST
+<?php
+/**
+ * Namespace for models test
+ */
+namespace $namespace\Test\Unit;
+/**
+ * PageBlock
+ */
+/**
+ * ClassBlock
+ */
+class $test_name extends \PHPUnit_Extensions_Database_TestCase{
+
+}
+TEST;
+	$fixture = <<<YAML
+%YAML 1.1
+---
+-
+	__class__: $namespace\App\Models\\$name
+-
+
+YAML;
+	write_file($model, PROJECT_ROOT . 'app/models/' . $name . ".php");
+	write_file($test, PROJECT_ROOT . 'test/unit/' . $name . "Test.php");
+	write_file($fixture, PROJECT_ROOT . 'test/fixtures/' . $name . ".yml");
+	generate_migration($name);
+}
+
+
+function generate_migration($name, $create=true)
+{
+	$model = '';
+	$create = '';
+	$drop = '';
+	if($create){
+		$model = $name;
+		$create = '$this->createTable(\'' . $model . '\');';
+		$drop = '$this->dropTable(\'' . $model . '\');';
+		$name = 'create_' . $name;
+	}
+	$name = date('YmdHis') . '_' . $name;
+	$migration = <<<MODEL
+<?php
+/**
+ * Use the up method to describe the SQL that will be used to create/alter tables, columns.
+ *
+ * Use the down method to undo what the up method has described.
+ */
+/**
+ * ClassBlock
+ */
+class Migration_$name extends Migration{
+
+	public function up(){
+		$create
+	}
+
+
+	public function down(){
+		$drop
+	}
+
+
+}
+MODEL;
+	write_file($migration, PROJECT_ROOT . 'db/migrations/' . $name . '.migration.php');
+}
+
+function generate_mailer($name, $argv){
+	$namespace = PR_APPLICATION_NAMESPACE;
+	$methods = '';
+	foreach($argv as $value){
+		$methods .= <<<METHOD
+	/**
+	 * Description
+	 *
+	 * @return void
+	 * @author name
+	 */
+	public function $value(){
+
+	}
+
+
+METHOD;
+	}
+
+	$arr = explode('/', $name);
+	//var_dump($arr);
+	$mailerName = array_pop($arr);
+	$mailerName = $mailerName  . "Mailer";
+	$namespace_path = $namespace . '\App\Mailers';
+	$use = '';
+	$extend_namespace = 'ApplicationMailer';
+	$path = '';
+	if(sizeof($arr) > 0){
+		$use = <<<USE
+
+/**
+ * Set up the use for the main controllers
+ */
+use $namespace_path;
+USE;
+		$extend_namespace = 'Mailers\ApplicationMailer';
+		foreach($arr as $namespace_token){
+			$namespace_path .= "\\" . $namespace_token;
+			$path .= preg_replace('/([^\s])([A-Z])/', '\1-\2', $namespace_token);
+			$path = $path . '/';
+			//print $namespace_token . '<br/>';
+		}
+	}
+	//die($path);
+	$controller_namespace = 'namespace ' . $namespace_path . ';';
+
+	$controller = <<<CLASS
+<?php
+/**
+ * PageBlock
+ */
+/**
+ * Namespace for the Mailers
+ */
+$controller_namespace
+$use
+
+/**
+ * $mailerName
+ */
+class $mailerName extends $extend_namespace{
+
+$methods
+}
+CLASS;
+
+	write_file($controller, PROJECT_ROOT . 'app/mailers/' . strtolower($path) . $mailerName . ".php");
+	generate_views($name, $argv, true);
+}
+
+
+function generate_controller($name, $argv){
+	$namespace = PR_APPLICATION_NAMESPACE;
+	$methods = '';
+	foreach($argv as $value){
+		$methods .= <<<METHOD
+	/**
+	 * Description
+	 *
+	 * @return void
+	 * @author name
+	 */
+	public function $value(){
+
+	}
+
+
+METHOD;
+	}
+
+	$arr = explode('/', $name);
+	//var_dump($arr);
+	$helperName = $controllerName = array_pop($arr);
+	$controllerName = $controllerName  . "Controller";
+	$helperName = $helperName . "Helper";
+	$testName = $controllerName . 'Test';
+	$namespace_path = $namespace . '\App\Controllers';
+	$use_models = $namespace . '\App\Models';
+	$test_namespace_path = $namespace . '\Test\Functional';
+	$use = '';
+	$test_use = '';
+	$extend_namespace = 'ApplicationController';
+	$path = '';
+	if(sizeof($arr) > 0){
+		$use = <<<USE
+
+/**
+ * Set up the use for the main controllers
+ */
+use $namespace_path;
+USE;
+$test_use = <<<USE
+
+/**
+* Set up the use for the main controllers
+*/
+use $test_namespace_path;
+USE;
+		$extend_namespace = 'Controllers\ApplicationController';
+		foreach($arr as $namespace_token){
+			$namespace_path .= "\\" . $namespace_token;
+			$test_namespace_path .= "\\" . $namespace_token;
+			$path .= preg_replace('/([^\s])([A-Z])/', '\1-\2', $namespace_token);
+			$path = $path . '/';
+			//print $namespace_token . '<br/>';
+		}
+	}
+	//die($path);
+	$controller_namespace = 'namespace ' . $namespace_path . ';';
+	$test_namespace = 'namespace ' . $test_namespace_path . ';';
+
+	$controller = <<<CLASS
+<?php
+/**
+ * PageBlock
+ */
+/**
+ * Namespace for the controllers
+ */
+$controller_namespace
+$use
+
+/**
+ * Use the models.
+ */
+use $use_models;
+/**
+ * ClassBlock
+ */
+class $controllerName extends $extend_namespace{
+
+$methods
+}
+CLASS;
+
+
+    $helper = <<<FILE
+<?php
+
+FILE;
+
+$test = <<<TEST
+<?php
+/**
+ * PageBlock
+ */
+/**
+ * Namespace for the controllers
+ */
+$test_namespace
+$test_use
+/**
+ * ClassBlock
+ */
+class $testName extends Functional\ApplicationControllerTest
+{
+
+}
+TEST;
+	write_file($controller, PROJECT_ROOT . 'app/controllers/' . strtolower($path) . $controllerName . ".php");
+	write_file($helper, PROJECT_ROOT . 'app/helpers/' . strtolower($path) . $helperName . '.php');
+	write_file($test, PROJECT_ROOT . 'test/functional/' . strtolower($path) . $testName . '.php');
+	generate_views($name, $argv);
+}
+
+function generate_views($controller_name, $argv, $isMailer = false)
+{
+	$mailers = '';
+	if($isMailer)
+		$mailers = 'mailers/';
+	$Controller = ($isMailer) ? $controller_name . 'Mailer' : $controller_name . "Controller";
+	$controller_name = preg_replace('/([^\s])([A-Z])/', '\1-\2', $controller_name);
+	$file_name = preg_replace('%\/\-%', '/', $controller_name);
+	$path = PROJECT_ROOT . 'app/views/' . $mailers . strtolower($file_name);
+	$c_name = preg_replace('%\/%', '\\', $Controller);
+	foreach($argv as $value){
+		$file = <<<FILE
+This file is generated for $c_name#$value.
+FILE;
+		write_file($file, $path . '/' . $value . '.html.php');
+	}
+}
+
+function write_file($content, $path){
+	$boolean = false;
+	//Create the folders
+	$folders = explode('/', $path);
+
+	//Take off the file.
+	array_pop($folders);
+	$folder_path = '';
+	foreach($folders as $folder){
+		$folder_path .= $folder . '/';
+		if(!is_dir($folder_path)){
+			mkdir($folder_path);
+			//exit();
+		}
+	}
+
+	//Write the file
+	if(!is_dir($path) && !is_file($path)){
+		$fp = fopen($path, 'w');
+		$boolean = fwrite($fp, $content);
+	}
+	if($boolean === false){
+		print "Skipped: $path\n";
+	}else{
+		print "Created: $path\n";
+	}
+}
