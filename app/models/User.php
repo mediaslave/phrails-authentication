@@ -26,6 +26,8 @@ class User extends \Model{
 
 	public $uroles = array();
 
+	public $_settings;
+
 	/**
 	 * Add rules for this model.
 	 *
@@ -36,8 +38,16 @@ class User extends \Model{
 
 		$s = $this->schema();
 
-		$s->hasMany('roles')->thru('net\mediaslave\authentication\app\models\UserRole', true)->className('net\mediaslave\authentication\app\models\Role', true);
-		$s->hasMany('user_roles')->className('net\mediaslave\authentication\app\models\UserRole', true);
+		$s->hasMany('roles')
+		  ->className('net\mediaslave\authentication\app\models\Role', true)
+			->thru('net\mediaslave\authentication\app\models\UserRole', true);
+
+		$s->hasMany('user_roles')
+			->className('net\mediaslave\authentication\app\models\UserRole', true);
+
+		$s->hasMany('settings')
+			->className('net\mediaslave\authentication\app\models\UserSetting', true)
+			->thru('net\mediaslave\authentication\app\models\UserSettingThruUser', true);
 
 		$this->prepareRoles();
 		$s->required('login', 'email');
@@ -170,5 +180,41 @@ class User extends \Model{
 		foreach($roles as $role){
 			$this->uroles[] = $role->name;
 		}
+	}
+
+	/**
+	 *
+	 * Get the setting specified and retur it
+	 *
+	 * @param string $set
+	 * @return mixed string || \Hash
+	 * @author Justin Palmer
+	 **/
+	public function setting($set=null)
+	{
+		if(!($this->_settings instanceof \Hash)){
+			$this->_settings = new \Hash;
+		}
+		$this->prepareRoles();
+		//load settings
+		//convert to hash
+		//return one or all depending on the param
+		foreach($this->settings as $setting){
+			foreach($setting->roles as $role){
+				if($this->hasRole($role->name)){
+					//Yes we have this the role required for this setting
+					//add it.
+					try {
+						$value = UserSettingThruUser::noo()->findByUserSettingIdAndUserId($setting->id, $this->id);
+						$this->_settings->set($setting->slug, $value->value);
+					} catch (\RecordNotFoundException $e) {/*don't add the setting*/}
+				}
+			}
+		}
+
+		if($set === null){
+			return $this->_settings;
+		}
+		return $this->_settings->get($set);
 	}
 }
