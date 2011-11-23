@@ -61,7 +61,6 @@ class User extends \Model{
 		$s->rule('password', new \PregRule('%^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).{4,13}$%', 'Password should include one lower case letter, one upper case letter, one digit, 6-15 characters in length, and no spaces.'));
 
 	}
-
 	/**
 	 * Does the user have the appropriate roles?
 	 *
