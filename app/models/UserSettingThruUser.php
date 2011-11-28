@@ -7,9 +7,9 @@ namespace net\mediaslave\authentication\app\models;
  * PageBlock
  */
 /**
- * ClASsBlock
+ * ClassBlock
  */
-clASs UserSettingThruUser extends \Model{
+class UserSettingThruUser extends \Model{
 
 
 	/**

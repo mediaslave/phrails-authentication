@@ -10,8 +10,6 @@ namespace net\mediaslave\authentication\app\models;
  * ClassBlock
  */
 class UserSetting extends \Model{
-
-
 	/**
 	 * Add rules for this model.
 	 *
