@@ -28,6 +28,17 @@ class User extends \Model{
 
 	public $_settings;
 
+	function __construct($array=array()) {
+		parent::__construct($array);
+		//Do we need to trace the user?
+		$settings = \Registry::get('pr-plugin-phrails-authentication');
+		if($settings->global->trace){
+			$trace = new UserTrace();
+			$trace->user_id = $this->id;
+			$trace->create();
+		}
+	}
+
 	/**
 	 * Add rules for this model.
 	 *
@@ -59,7 +70,6 @@ class User extends \Model{
 		$s->rule('email', new \UniqueDatabaseRule());
 
 		$s->rule('password', new \PregRule('%^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).{4,13}$%', 'Password should include one lower case letter, one upper case letter, one digit, 6-15 characters in length, and no spaces.'));
-
 	}
 	/**
 	 * Does the user have the appropriate roles?

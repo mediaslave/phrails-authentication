@@ -48,6 +48,6 @@ class UserSettingThruUser extends \Model{
                                 ON `rthru`.user_setting_id = `setting`.id
                             WHERE `user`.id = ?
                             GROUP BY `user_setting`.user_id, `user_setting`.user_setting_id',
-                            array($id));
+                            array($id), true);
   }
 }
