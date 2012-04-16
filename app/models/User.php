@@ -26,6 +26,8 @@ class User extends \Model{
 
 	public $uroles = array();
 
+	protected $role_ids = array();
+
 	public $_settings;
 
 	function __construct($array=array()) {
@@ -192,7 +194,17 @@ class User extends \Model{
 		$roles = $this->roles;
 		foreach($roles as $role){
 			$this->uroles[] = $role->name;
+			$this->role_ids[] = $role->id;
 		}
+	}
+
+	/**
+	 * Get the role id's
+	 * 
+	 * @return array
+	 */
+	public function getRoleIds(){
+		return $this->role_ids;
 	}
 
 	/**
