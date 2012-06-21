@@ -21,15 +21,18 @@ class UserTrace extends \Model{
 		$Request = \Registry::get('pr-request');
 		$Route = \Registry::get('pr-route');
 
-		$this->name = $Route->name;
-		$this->controller = $Route->controller;
-		$this->action = $Route->action;
-		$this->view_type = $Route->view_type;
-		$this->namespace = $Route->namespace;
+		if(is_object($Route)){
+			$this->name = $Route->name;
+			$this->controller = $Route->controller;
+			$this->action = $Route->action;
+			$this->view_type = $Route->view_type;
+			$this->namespace = $Route->namespace;
+			$this->path = $Route->path;
+		}
+
 
 		$this->request_uri = $Request->server('REQUEST_URI');
 
-		$this->path = $Route->path;
 		$this->params = $this->serialize($Request->get());
 		$this->post = $this->serialize($Request->post());
 
