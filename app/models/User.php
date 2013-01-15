@@ -213,7 +213,6 @@ class User extends \Model{
 	 *
 	 * @param string $set
 	 * @return mixed string || \Hash
-	 * @author Justin Palmer
 	 **/
 	public function setting($set=null)
 	{
@@ -227,7 +226,7 @@ class User extends \Model{
 		foreach($this->settings as $setting){
 			foreach($setting->roles as $role){
 				if($this->hasRole($role->name)){
-					//Yes we have this the role required for this setting
+					//Yes we have the role required for this setting
 					//add it.
 					try {
 						$value = UserSettingThruUser::noo()->findByUserSettingIdAndUserId($setting->id, $this->id);
