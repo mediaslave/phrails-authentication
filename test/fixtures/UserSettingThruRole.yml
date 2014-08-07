@@ -1,5 +1,5 @@
 %YAML 1.1
 ---
 -
-	__class__: Com\CetManagement\Crm\Admin\App\Models\UserSettingThruRole
+    __class__: net\mediaslave\authentication\app\models\UserSettingThruRole
 -
