@@ -16,7 +16,7 @@ class User extends \Model{
 	const state_suspended = 'suspended';
 
 	const USERNAME_MESSAGE = 'Username should be between 6 and 15 characters in length.  Additionally, it can only contain characters (a-z or capital A-Z), period (.) and hyphen (-).';
-	const PASSWORD_MESSAGE = 'Password should be between 6 and 15 characters in length.  Additionally, it must contain one upper case letter, one lower case letter, and one digit. It may not contain spaces.';
+	const PASSWORD_MESSAGE = 'Password should be between 6 and 40 characters in length.  Additionally, it must contain one upper case letter, one lower case letter, and one digit. It may not contain spaces.';
 
 	/**
 	 * This is because the constant CRYPT_SALT_LENGTH does not work
@@ -71,7 +71,7 @@ class User extends \Model{
 		$s->rule('email', new \EmailRule());
 		$s->rule('email', new \UniqueDatabaseRule());
 
-		$s->rule('password', new \PregRule('%^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).{4,13}$%', 'Password should include one lower case letter, one upper case letter, one digit, 6-15 characters in length, and no spaces.'));
+		$s->rule('password', new \PregRule('%^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).{4,37}$%', 'Password should include one lower case letter, one upper case letter, one digit, 6-15 characters in length, and no spaces.'));
 	}
 	/**
 	 * Does the user have the appropriate roles?
